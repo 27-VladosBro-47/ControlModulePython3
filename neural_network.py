@@ -40,8 +40,8 @@ class NeuralNetwork:
             self.d_weights.append([])
             for weights in range(self.neuronsLayers[countOfLayer+1].size):
                 random.seed()
-                self.weights[countOfLayer].append(np.array([random.uniform(-2.5, 2.5) for i in range(self.neuronsLayers[countOfLayer].size)]))
-                self.d_weights[countOfLayer].append(np.array([random.uniform(-2.5, 2.5) for i in range(self.neuronsLayers[countOfLayer].size)]))
+                self.weights[countOfLayer].append(np.array([random.uniform(-1.2, 1.2) for i in range(self.neuronsLayers[countOfLayer].size)]))
+                self.d_weights[countOfLayer].append(np.array([random.uniform(-1.2, 1.2) for i in range(self.neuronsLayers[countOfLayer].size)]))
 
     def debug_showNeuronsLayers(self):
         print("======================================")
@@ -124,9 +124,9 @@ class NeuralNetwork:
         self.neuronsLayers[0] = npDataList.copy()
 
         for count in range(self.d_neuronsLayers[len(self.d_neuronsLayers)-1].size):
-            self.d_neuronsLayers[len(self.d_neuronsLayers)-1][count] = 0.00001
+            self.d_neuronsLayers[len(self.d_neuronsLayers)-1][count] = 0.0
             if count == numbOfGesture:
-                self.d_neuronsLayers[len(self.d_neuronsLayers)-1][count] = 0.99
+                self.d_neuronsLayers[len(self.d_neuronsLayers)-1][count] = 1.0
 
     # For work
     # Set input neurons (s-elements)
@@ -146,6 +146,8 @@ class NeuralNetwork:
     def answer(self):
         for numbOfGesture, r_element in enumerate(self.neuronsLayers[len(self.neuronsLayers)-1]):
             if r_element >= 0.75: return numbOfGesture
+        
+        return -1
 
     def work(self, dataList):
         self.set_S_elements_work(dataList)
@@ -316,18 +318,22 @@ def generateDataList(count):
     
     return dataList
 
-data = NeuralNetwork(0.1, 10, 100, 5)
+data = NeuralNetwork(0.05, 10, 100, 100, 5)
 
 
-for numbOfLearningData in range(10000):
+for numbOfLearningData in range(1000):
     print(f"numbOfLearningData = {numbOfLearningData}")
     count = numbOfLearningData % 5
+
+    if(count == 5): count = 3
+
     print("count =", count)
     dataList = generateDataList(count)
     #print(dataList)
     data.learning(dataList, count)
     data.debug_showLastLayer()
 #data.debug_showLastLayer()
+
 
 dataList = generateDataList(0)
 print("ans:",data.work(dataList))
