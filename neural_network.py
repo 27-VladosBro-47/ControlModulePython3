@@ -1,6 +1,7 @@
 import random
 import math
 import numpy as np
+import json
 
 
 
@@ -27,6 +28,7 @@ class NeuralNetwork:
         assert len(layers) >= 3, "NeuralNetwork.__init__()\nMin layers are 3"
         for elementsOfLayer in layers:
             assert type(elementsOfLayer) == int , "NeuralNetwork.__init__()\nArgs must be integer-type"
+            
             random.seed()
             self.neuronsLayers.append(np.array([random.uniform(0.05, 0.95) for i in range(elementsOfLayer)]))
             self.d_neuronsLayers.append(np.array([random.uniform(0.05, 0.95) for i in range(elementsOfLayer)]))
@@ -35,13 +37,14 @@ class NeuralNetwork:
             self.bias.append(np.array([random.uniform(0.05, 0.95) for i in range(elementsOfLayer)]))
             self.d_bias.append(np.array([random.uniform(0.05, 0.95) for i in range(elementsOfLayer)]))
 
+
         for countOfLayer in range(len(self.neuronsLayers)-1):
             self.weights.append([])
             self.d_weights.append([])
             for weights in range(self.neuronsLayers[countOfLayer+1].size):
                 random.seed()
-                self.weights[countOfLayer].append(np.array([random.uniform(-1.2, 1.2) for i in range(self.neuronsLayers[countOfLayer].size)]))
-                self.d_weights[countOfLayer].append(np.array([random.uniform(-1.2, 1.2) for i in range(self.neuronsLayers[countOfLayer].size)]))
+                self.weights[countOfLayer].append(np.array([random.uniform(-1.5, 1.5) for i in range(self.neuronsLayers[countOfLayer].size)]))
+                self.d_weights[countOfLayer].append(np.array([random.uniform(-1.5, 1.5) for i in range(self.neuronsLayers[countOfLayer].size)]))
 
     def debug_showNeuronsLayers(self):
         print("======================================")
@@ -194,11 +197,22 @@ class NeuralNetwork:
 
             self.setDifference(layer)
   
-    def saveConfigurations(self):
-        pass
+    def saveConfigurations(self, path = "data/test_neural_network_configurations/configurations.json"):
+        buffListWeights = []
+        buffListNeuronsLayers = []
 
-    def loadConfigurations(self):
-        pass
+        for layer in self.neuronsLayers:
+            buffListNeuronsLayers.append(layer.size)
+
+        for i, weightsBlock in enumerate(self.weights):
+            buffListWeights.append([])
+            for weights in weightsBlock:
+                buffListWeights[i].append(weights.tolist())
+
+        data = {"learning_speed" : self.learningSpeed, "neurons_layers" : buffListNeuronsLayers, "weights" : buffListWeights}
+
+        with open(path, 'w+') as f_in:
+            json.dump(data, f_in, indent=2)
 
     def convertList(self, notConvertedDataList):
         dataList = []
@@ -206,7 +220,29 @@ class NeuralNetwork:
             dataList.append(self.sigm(element))
         return dataList
 
-        
+    def createFromConfigFile(path = "data/neural_network_configurations/configurations.json"):
+        with open(path, 'r') as f_out:
+            data = json.load(f_out)
+
+            learningSpeed = data["learning_speed"]
+            neuronsLayers = data["neurons_layers"]
+            weights = data["weights"]
+
+            neuronsNet = NeuralNetwork(learningSpeed, *neuronsLayers) 
+            neuronsNet.__setWeightsFromList__(weights)
+
+            return neuronsNet
+
+    def __setWeightsFromList__(self, weightsList):
+        assert len(self.weights) == len(weightsList), "NeuralNetwork.__setWeightsFromList__()\nIncorrect size of weightsList"
+
+        for numbOfWeightsBlock, weightsBlock in enumerate(self.weights):
+            assert len(self.weights[numbOfWeightsBlock]) == len(weightsBlock), "NeuralNetwork.__setWeightsFromList__()\nIncorrect size of weightsBlock"
+            
+            for numbOfWeights, weights in enumerate(weightsBlock):
+                assert weights.size == len(weightsList[numbOfWeightsBlock][numbOfWeights]), "NeuralNetwork.__setWeightsFromList__()\nIncorrect size of weights"
+                self.weights[numbOfWeightsBlock][numbOfWeights] = np.array(weightsList[numbOfWeightsBlock][numbOfWeights])
+
 def generateDataList(count):
     dataList = []
 
@@ -321,11 +357,25 @@ def generateDataList(count):
 data = NeuralNetwork(0.05, 10, 100, 100, 5)
 
 
+
+'''data = NeuralNetwork.createFromConfigFile()
+
+dataList = generateDataList(0)
+print("ans:",data.work(dataList))
+dataList = generateDataList(1)
+print("ans:",data.work(dataList))
+dataList = generateDataList(2)
+print("ans:",data.work(dataList))
+dataList = generateDataList(3)
+print("ans:",data.work(dataList))
+dataList = generateDataList(4)
+print("ans:",data.work(dataList))'''
+
+
+
 for numbOfLearningData in range(1000):
     print(f"numbOfLearningData = {numbOfLearningData}")
     count = numbOfLearningData % 5
-
-    if(count == 5): count = 3
 
     print("count =", count)
     dataList = generateDataList(count)
@@ -345,6 +395,8 @@ dataList = generateDataList(3)
 print("ans:",data.work(dataList))
 dataList = generateDataList(4)
 print("ans:",data.work(dataList))
+
+
 
 '''count = 1
 dataList = generateDataList(count)
