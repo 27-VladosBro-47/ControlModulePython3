@@ -1,9 +1,11 @@
 import cv2
 import json
+import os
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 
 import hand_detector_mediapipe as HandDetector
+import neural_network
 
 class HandTracking:
 
@@ -24,9 +26,37 @@ class HandTracking:
         # Initialization Hand Detector
         self.handDetector = HandDetector.handDetectorMediapipe(isWork,isHandDetected,handPos)
 
+        self.neuralNetwork = neural_network.NeuralNetwork.createFromConfigFile()
+
         cv2.waitKey(100)
 
-    def mainFunction(self):
+    def mainFunctionTracking(self):
+
+        for frame in self.cam.capture_continuous(self.rawCapture, format="bgr",
+        use_video_port=True):
+            # grab the raw NumPy array representing the image, then initialize the timestamp
+            # and occupied/unoccupied text
+            img = frame.array
+            img = cv2.flip(img, 0)
+
+            img = self.handDetector.findHands(img)
+            handLM = self.handDetector.findPosition(img)
+
+            handLM = neural_network.getListLM(handLM)
+            if not (len(handLM) == 0):
+                result = self.neuralNetwork.work(handLM)
+                cv2.putText(img, str(result), (50,50),cv2.FONT_HERSHEY_SIMPLEX,1,(255,0,255),2)
+
+            cv2.imshow("Video", img)
+
+            if(cv2.waitKey(1) & 0xFF == ord("q")):
+                self.isWork.value = False
+                break
+
+            # clear the stream in preparation for the next frame
+            self.rawCapture.truncate(0)
+
+    def mainFunctionMakeData(self):
 
         for frame in self.cam.capture_continuous(self.rawCapture, format="bgr",
         use_video_port=True):
@@ -41,15 +71,15 @@ class HandTracking:
             if (len(handLM)) != 0:
                 self.saveHandLM(handLM)
 
-            # Show the frame
             cv2.imshow("Video", img)
 
             if(cv2.waitKey(1) & 0xFF == ord("q")):
-                isWork = False
+                self.isWork.value = False
                 break
 
             # clear the stream in preparation for the next frame
             self.rawCapture.truncate(0)
+
 
 
     def saveHandLM(self, lm):
@@ -65,20 +95,23 @@ class HandTracking:
             self.updateTrainDataFile(4, lm)
 
     def updateTrainDataFile(self, gesture, lm):
-        path = "data/test_training_data/test_training_data.json"
+        path = f"data/test_training_data/training_data_{gesture}.json"
         data = {}
 
-        with open(path, 'r') as f_out:
-            data = json.load(f_out)
+        if (not (os.path.isfile(path))) or (os.stat(path).st_size == 0):
+            with open(path, 'w') as f:
+                data[str(gesture)] = []
+                json.dump(data, f, indent=2)
 
-        with open(path, 'w') as f_in:
+        with open(path, 'r') as f:
+            data = json.load(f)
+
+        with open(path, 'w') as f:
             data[str(gesture)].append(lm)
-            json.dump(data, f_in, indent=2)
+            json.dump(data, f, indent=2)
             print("Data has been created!")
 
         cv2.waitKey(1000)
-
-
 
 
 

@@ -28,7 +28,7 @@ class NeuralNetwork:
         assert len(layers) >= 3, "NeuralNetwork.__init__()\nMin layers are 3"
         for elementsOfLayer in layers:
             assert type(elementsOfLayer) == int , "NeuralNetwork.__init__()\nArgs must be integer-type"
-            
+
             random.seed()
             self.neuronsLayers.append(np.array([random.uniform(0.05, 0.95) for i in range(elementsOfLayer)]))
             self.d_neuronsLayers.append(np.array([random.uniform(0.05, 0.95) for i in range(elementsOfLayer)]))
@@ -108,7 +108,7 @@ class NeuralNetwork:
     def calculateNeuron(self, layerIndex, neuronIndex):
         assert (layerIndex >= 1 and layerIndex < len(self.neuronsLayers)), "NeuralNetwork.calculateNeuron()\nIncorrect index of neuron`s layer"
         assert (neuronIndex >= 0 and neuronIndex < self.neuronsLayers[layerIndex].size), "NeuralNetwork.calculateNeuron()\nIncorrect index of neurons in layer"
-        
+
         self.sum[layerIndex][neuronIndex] = (self.neuronsLayers[layerIndex-1]*self.weights[layerIndex-1][neuronIndex]).sum()
         self.neuronsLayers[layerIndex][neuronIndex] = self.sigm( self.sum[layerIndex][neuronIndex] + self.bias[layerIndex][neuronIndex])
 
@@ -116,7 +116,7 @@ class NeuralNetwork:
         for countOfLayer in range(1,len(self.neuronsLayers)):
             for countOfNeuron in range(self.neuronsLayers[countOfLayer].size):
                 self.calculateNeuron(countOfLayer,countOfNeuron)
-    
+
     # For learning
     # Set input neurons (s-elements)
     def set_S_elements_learning(self, dataList, numbOfGesture):
@@ -141,15 +141,16 @@ class NeuralNetwork:
 
     def setDifferenceAtLastLayer(self):
         self.d_neuronsLayers[len(self.d_neuronsLayers)-1] = self.d_neuronsLayers[len(self.d_neuronsLayers)-1] - self.neuronsLayers[len(self.d_neuronsLayers)-1]
-        
+
     def levelOfEducation(self):
         level = (self.d_neuronsLayers[len(self.d_neuronsLayers)-1]**2).sum()
         return level
 
     def answer(self):
+        self.debug_showLastLayer()
         for numbOfGesture, r_element in enumerate(self.neuronsLayers[len(self.neuronsLayers)-1]):
-            if r_element >= 0.75: return numbOfGesture
-        
+            if r_element >= 0.90: return numbOfGesture
+
         return -1
 
     def work(self, dataList):
@@ -168,13 +169,13 @@ class NeuralNetwork:
         for numbOfWeightsBlock, weightsBlock in enumerate(self.weights[layer]):
             for numbOfWeight, w in enumerate(weightsBlock):
                 self.d_weights[layer][numbOfWeightsBlock][numbOfWeight] = 2*(self.d_neuronsLayers[layer+1][numbOfWeightsBlock])*self.derivativeSigm(self.sum[layer+1][numbOfWeightsBlock])*self.neuronsLayers[layer][numbOfWeight]
-                      
+
     def backPropagationNeurons(self, layer):
         for numbOfNeuron in range(self.neuronsLayers[layer].size):
             d_sum = 0.0
             for block in range(len(self.weights[layer])):
                 d_sum += 2*(self.d_neuronsLayers[layer+1][block])*self.derivativeSigm(self.sum[layer+1][block])*self.weights[layer][block][numbOfNeuron]
-            
+
             self.d_neuronsLayers[layer][numbOfNeuron] = d_sum
 
     def backPropagationBias(self, layer):
@@ -196,7 +197,7 @@ class NeuralNetwork:
             self.backPropagationBias(layer)
 
             self.setDifference(layer)
-  
+
     def saveConfigurations(self, path = "data/test_neural_network_configurations/configurations.json"):
         buffListWeights = []
         buffListNeuronsLayers = []
@@ -228,7 +229,7 @@ class NeuralNetwork:
             neuronsLayers = data["neurons_layers"]
             weights = data["weights"]
 
-            neuronsNet = NeuralNetwork(learningSpeed, *neuronsLayers) 
+            neuronsNet = NeuralNetwork(learningSpeed, *neuronsLayers)
             neuronsNet.__setWeightsFromList__(weights)
 
             return neuronsNet
@@ -238,185 +239,15 @@ class NeuralNetwork:
 
         for numbOfWeightsBlock, weightsBlock in enumerate(self.weights):
             assert len(self.weights[numbOfWeightsBlock]) == len(weightsBlock), "NeuralNetwork.__setWeightsFromList__()\nIncorrect size of weightsBlock"
-            
+
             for numbOfWeights, weights in enumerate(weightsBlock):
                 assert weights.size == len(weightsList[numbOfWeightsBlock][numbOfWeights]), "NeuralNetwork.__setWeightsFromList__()\nIncorrect size of weights"
                 self.weights[numbOfWeightsBlock][numbOfWeights] = np.array(weightsList[numbOfWeightsBlock][numbOfWeights])
 
-def generateDataList(count):
-    dataList = []
+def getListLM(lm):
+    listLM = []
+    for elem in lm:
+        listLM.append(elem[0])
+        listLM.append(elem[2])
 
-    if count == 0:
-        random.seed()
-        dataList.append(random.uniform(0.07, 0.12))
-        random.seed()
-        dataList.append(random.uniform(0.07, 0.12))
-        random.seed()
-        dataList.append(random.uniform(0.27, 0.32))
-        random.seed()
-        dataList.append(random.uniform(0.27, 0.32))
-        random.seed()
-        dataList.append(random.uniform(0.07, 0.12))
-        random.seed()
-        dataList.append(random.uniform(0.87, 0.92))
-        random.seed()
-        dataList.append(random.uniform(0.27, 0.32))
-        random.seed()
-        dataList.append(random.uniform(0.47, 0.52))
-        random.seed()
-        dataList.append(random.uniform(0.67, 0.72))
-        random.seed()
-        dataList.append(random.uniform(0.17, 0.22))
-    elif count == 1:
-        random.seed()
-        dataList.append(random.uniform(0.87, 0.92))
-        random.seed()
-        dataList.append(random.uniform(0.87, 0.92))
-        random.seed()
-        dataList.append(random.uniform(0.07, 0.12))
-        random.seed()
-        dataList.append(random.uniform(0.47, 0.52))
-        random.seed()
-        dataList.append(random.uniform(0.47, 0.52))
-        random.seed()
-        dataList.append(random.uniform(0.67, 0.72))
-        random.seed()
-        dataList.append(random.uniform(0.57, 0.62))
-        random.seed()
-        dataList.append(random.uniform(0.27, 0.32))
-        random.seed()
-        dataList.append(random.uniform(0.07, 0.12))
-        random.seed()
-        dataList.append(random.uniform(0.17, 0.22))
-    elif count == 2:
-        random.seed()
-        dataList.append(random.uniform(0.87, 0.92))
-        random.seed()
-        dataList.append(random.uniform(0.77, 0.82))
-        random.seed()
-        dataList.append(random.uniform(0.67, 0.72))
-        random.seed()
-        dataList.append(random.uniform(0.57, 0.62))
-        random.seed()
-        dataList.append(random.uniform(0.47, 0.52))
-        random.seed()
-        dataList.append(random.uniform(0.37, 0.42))
-        random.seed()
-        dataList.append(random.uniform(0.27, 0.32))
-        random.seed()
-        dataList.append(random.uniform(0.17, 0.22))
-        random.seed()
-        dataList.append(random.uniform(0.07, 0.12))
-        random.seed()
-        dataList.append(random.uniform(0.07, 0.12))
-    elif count == 3:
-        random.seed()
-        dataList.append(random.uniform(0.07, 0.12))
-        random.seed()
-        dataList.append(random.uniform(0.07, 0.12))
-        random.seed()
-        dataList.append(random.uniform(0.17, 0.22))
-        random.seed()
-        dataList.append(random.uniform(0.27, 0.32))
-        random.seed()
-        dataList.append(random.uniform(0.37, 0.42))
-        random.seed()
-        dataList.append(random.uniform(0.47, 0.52))
-        random.seed()
-        dataList.append(random.uniform(0.57, 0.62))
-        random.seed()
-        dataList.append(random.uniform(0.67, 0.72))
-        random.seed()
-        dataList.append(random.uniform(0.77, 0.82))
-        random.seed()
-        dataList.append(random.uniform(0.87, 0.92))
-    elif count == 4:
-        random.seed()
-        dataList.append(random.uniform(0.47, 0.52))
-        random.seed()
-        dataList.append(random.uniform(0.57, 0.62))
-        random.seed()
-        dataList.append(random.uniform(0.67, 0.72))
-        random.seed()
-        dataList.append(random.uniform(0.07, 0.12))
-        random.seed()
-        dataList.append(random.uniform(0.27, 0.32))
-        random.seed()
-        dataList.append(random.uniform(0.17, 0.22))
-        random.seed()
-        dataList.append(random.uniform(0.07, 0.12))
-        random.seed()
-        dataList.append(random.uniform(0.07, 0.12))
-        random.seed()
-        dataList.append(random.uniform(0.67, 0.72))
-        random.seed()
-        dataList.append(random.uniform(0.37, 0.42))
-    
-    return dataList
-
-data = NeuralNetwork(0.05, 10, 100, 100, 5)
-
-
-
-'''data = NeuralNetwork.createFromConfigFile()
-
-dataList = generateDataList(0)
-print("ans:",data.work(dataList))
-dataList = generateDataList(1)
-print("ans:",data.work(dataList))
-dataList = generateDataList(2)
-print("ans:",data.work(dataList))
-dataList = generateDataList(3)
-print("ans:",data.work(dataList))
-dataList = generateDataList(4)
-print("ans:",data.work(dataList))'''
-
-
-
-for numbOfLearningData in range(1000):
-    print(f"numbOfLearningData = {numbOfLearningData}")
-    count = numbOfLearningData % 5
-
-    print("count =", count)
-    dataList = generateDataList(count)
-    #print(dataList)
-    data.learning(dataList, count)
-    data.debug_showLastLayer()
-#data.debug_showLastLayer()
-
-
-dataList = generateDataList(0)
-print("ans:",data.work(dataList))
-dataList = generateDataList(1)
-print("ans:",data.work(dataList))
-dataList = generateDataList(2)
-print("ans:",data.work(dataList))
-dataList = generateDataList(3)
-print("ans:",data.work(dataList))
-dataList = generateDataList(4)
-print("ans:",data.work(dataList))
-
-
-
-'''count = 1
-dataList = generateDataList(count)
-#print(dataList)
-data.learning(dataList, count)
-data.debug_showNeuronsLayers()
-
-data.debug_showLastLayer()'''
-
-
-
-'''data.debug_showNeuronsLayers()
-print(" ")
-data.debug_showWeights()
-print(" ")
-data.debug_showBias()
-data.calculateNeuron(1,0)
-data.fowardPropagation()'''
-
-'''data1 = NeuralNetwork(0.02, 2, 3, 3, 2)
-
-l1 = [0.2, 0.3]
-data1.learning(l1, 0)'''
+    return listLM
