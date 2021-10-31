@@ -61,7 +61,6 @@ class AltAzimuth:
         servo.start(0)
         dutyCycle = angle / 18.0 + 3
         servo.ChangeDutyCycle(dutyCycle)
-        #print(f"angle = {angle}")
         time.sleep(0.05)
         servo.stop()
         time.sleep(delay)
@@ -149,4 +148,3 @@ class AltAzimuth:
 
     def __del__(self):
         GPIO.cleanup()
-

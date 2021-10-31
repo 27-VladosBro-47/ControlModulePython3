@@ -9,6 +9,7 @@ import altazimuth
 import hand_tracking
 import neural_network
 
+import RPi.GPIO as GPIO
 
 # ================== tracking ================== #
 def tracking():

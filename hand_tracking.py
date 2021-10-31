@@ -6,6 +6,7 @@ from picamera import PiCamera
 
 import hand_detector_mediapipe as HandDetector
 import neural_network
+import wheels
 
 class HandTracking:
 
@@ -28,6 +29,8 @@ class HandTracking:
 
         self.neuralNetwork = neural_network.NeuralNetwork.createFromConfigFile()
 
+        self.wheels = wheels.Wheels([26,19,13,21], [5, 0])
+
         cv2.waitKey(100)
 
     def mainFunctionTracking(self):
@@ -46,6 +49,13 @@ class HandTracking:
             if not (len(handLM) == 0):
                 result = self.neuralNetwork.work(handLM)
                 cv2.putText(img, str(result), (50,50),cv2.FONT_HERSHEY_SIMPLEX,1,(255,0,255),2)
+                #HERE
+                isStop = self.wheels.move(result)
+                if isStop == 0:
+                    self.isWork.value = False
+                    break
+            else:
+                self.wheels.move(-1)
 
             cv2.imshow("Video", img)
 
@@ -112,7 +122,3 @@ class HandTracking:
             print("Data has been created!")
 
         cv2.waitKey(1000)
-
-
-
-
