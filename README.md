@@ -30,5 +30,20 @@
 
 Для реалізації процесу навчання нейромережі було власноруч створенно понад 7500 навчальних даних шляхом фотофіксації кисті руки автора.
 
+Запуск програми відбувається із термінала, виконанням команди **python3 source.py** із теки проекта.
+![alt-текст](https://github.com/27-VladosBro-47/ControlModulePython3/blob/main/for_md/terminal_def.png "Terminal")
+Також програма підтримує ще декілька режимів роботи, які активуються шляхом додавання параметра після назви скрипта (написання дозволено у довільному регістрі).
+#### make_data
+![alt-текст](https://github.com/27-VladosBro-47/ControlModulePython3/blob/main/for_md/terminal_make_data.png "Terminal")
+Прогорама запускається і починає пошук кисті руки.
+Після захоплення кисті руки
+![alt-текст](https://github.com/27-VladosBro-47/ControlModulePython3/blob/main/for_md/exemple.png "Gesture")
+необхідно натиснути клавішу 0,1,2,3 або 4, залежно від жесту і у папці data/test_training_data буде створений файл з навчальними даними (якщо його там не було) training_data_N.json, де N - номер жесту 0-4 (якщо його там не було). Необхідно створити всі 5 файлів із даними і, після того, як була створенна необхідна кількість даних, необхідно файли training_data_N.json перемістити у папку data/training_data перед початком навчання **python3 source.py make_data**
+#### learning
+![alt-текст](https://github.com/27-VladosBro-47/ControlModulePython3/blob/main/for_md/learning.png "Terminal")
+Команда запускає програму і розпочинає процес навчання нейромережі. У папці data/test_neural_network_configurations буде створений файл конфігурацій configurations.json на основі якого буде створенна нейромережа у режимі "learning". Для цього файл configurations.json необхідно перемістити з папки data/test_neural_network_configurations у папку data/neural_network_configurations перед запуском режиму "learning".
+#### tracking
+![alt-текст](https://github.com/27-VladosBro-47/ControlModulePython3/blob/main/for_md/terminal_def_1.png "Terminal")
+Команда запускає програму у звичайному режимі, якби була виконана команда **python3 source.py**
 
 
